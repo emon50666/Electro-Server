@@ -1,4 +1,5 @@
 const express = require("express")
+const { MongoClient, ServerApiVersion, Collection } = require('mongodb');
 const cors = require("cors")
 const cookieParser = require("cookie-parser");
 require('dotenv').config()
@@ -19,7 +20,7 @@ app.use(cookieParser())
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+
 const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_SECRET_API_KEY}@cluster0.mbvqn67.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -32,9 +33,29 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
+
+
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    const productCollection = client.db('ElectroMart').collection('products')
+
+
+
+    // post product api
+    app.post('/product',async (req,res)=>{
+      const ProductData = req.body;
+      console.log(ProductData);
+      const result = await productCollection.insertOne(ProductData)
+      res.send(result)
+    })
+
+
+
+
+
+
+
+
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
