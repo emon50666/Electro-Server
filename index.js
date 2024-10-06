@@ -40,13 +40,19 @@ async function run() {
 
 
 
-    // post product api
-    app.post('/product',async (req,res)=>{
+    // ========================================   product collection start    ========================================
+    app.get('/products', async (req, res) => {
+      const result = await productCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.post('/products', async (req, res) => {
       const ProductData = req.body;
       console.log(ProductData);
       const result = await productCollection.insertOne(ProductData)
       res.send(result)
     })
+    // ========================================   product collection end    ========================================
 
 
 
@@ -55,36 +61,25 @@ async function run() {
 
 
 
-    
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
 
-
-
-
-
-
-
-
-
-
-
-
 // normal get route full server
 app.get('/', (req, res) => {
-    res.send(`job portal server is running form: ${port} port`)
-  })
-  
-  app.listen(port, () => {
-    console.log(`server running this port: ${port}`);
-  
-  })
+  res.send(`Electro mart server is running form: ${port} port`)
+})
+
+app.listen(port, () => {
+  console.log(`server running this port: ${port}`);
+
+})
 
 
