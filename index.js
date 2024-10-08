@@ -1,5 +1,5 @@
 const express = require("express")
-const { MongoClient, ServerApiVersion, Collection } = require('mongodb');
+const { MongoClient, ServerApiVersion, Collection, ObjectId } = require('mongodb');
 const cors = require("cors")
 const cookieParser = require("cookie-parser");
 require('dotenv').config()
@@ -16,7 +16,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser())
-
 
 
 
@@ -50,6 +49,13 @@ async function run() {
       const ProductData = req.body;
       console.log(ProductData);
       const result = await productCollection.insertOne(ProductData)
+      res.send(result)
+    })
+
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.deleteOne(query);
       res.send(result)
     })
     // ========================================   product collection end    ========================================
