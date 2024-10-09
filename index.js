@@ -36,6 +36,8 @@ async function run() {
 
   try {
     const productCollection = client.db('ElectroMart').collection('products')
+    const cartCollection = client.db('ElectroMart').collection('carts')
+    const userCollection = client.db('ElectroMart').collection('users')
 
 
 
@@ -50,6 +52,20 @@ async function run() {
       console.log(ProductData);
       const result = await productCollection.insertOne(ProductData)
       res.send(result)
+    })
+
+    app.patch('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const { view } = req.body;
+      const options = { upsert: true };
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          view: view,
+        },
+      };
+      const result = await productCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     })
 
     app.delete("/products/:id", async (req, res) => {
@@ -68,22 +84,51 @@ async function run() {
     })
 
 
-    // ========================================   get all product data form db and pagination and search    ========================================
-
-  app.get('/products',async(req,res)=>{
-    // search
-    const search = req.query.search
-    // search 
-    let query = {
-     title: { $regex: search,$options: 'i' }
-   }
-
-    const result = await productCollection.find(query).toArray();
-    res.send(result)
-  })
+    // =================================== user collection start ===================================
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result)
+    })
+    // =================================== user collection end ===================================
 
 
+    // ========================================   cart collection start     ========================================
+    app.get("/carts", async (req, res) => {
+      const result = await cartCollection.find().toArray();
+      res.send(result)
+    })
 
+    app.post('/carts', async (req, res) => {
+      const cartProductInfo = req.body;
+      console.log(cartProductInfo);
+      const result = await cartCollection.insertOne(cartProductInfo)
+      res.send(result)
+    })
+
+    app.delete("/carts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await cartCollection.deleteOne(query);
+      res.send(result)
+    })
+    // ========================================   cart collection end    ========================================
+
+
+
+
+    app.get('/products',async(req,res)=>{
+      // search
+      const search = req.query.search
+      // search 
+      let query = {
+       title: { $regex: search,$options: 'i' }
+     }
+  
+      const result = await productCollection.find(query,options).toArray();
+      res.send(result)
+    })
+  
+  
 
 
 
