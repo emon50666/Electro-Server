@@ -121,7 +121,7 @@ async function run() {
       const search = req.query.search
       // search 
       let query = {
-       title: { $regex: search,$options: 'i' }
+       brand,title: { $regex: search,$options: 'i' }
      }
   
       const result = await productCollection.find(query,options).toArray();
