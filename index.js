@@ -52,6 +52,20 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const { view } = req.body;
+      const options = { upsert: true };
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          view: view,
+        },
+      };
+      const result = await productCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    })
+
     app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
