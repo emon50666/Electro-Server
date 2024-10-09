@@ -36,6 +36,8 @@ async function run() {
 
   try {
     const productCollection = client.db('ElectroMart').collection('products')
+    const cartCollection = client.db('ElectroMart').collection('carts')
+    const userCollection = client.db('ElectroMart').collection('users')
 
 
 
@@ -73,6 +75,29 @@ async function run() {
       res.send(result)
     })
     // ========================================   product collection end    ========================================
+
+
+    // =================================== user collection start ===================================
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result)
+    })
+    // =================================== user collection end ===================================
+
+
+    // ========================================   cart collection start     ========================================
+    app.get("/carts", async (req, res) => {
+      const result = await cartCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/carts', async (req, res) => {
+      const cartProductInfo = req.body;
+      console.log(cartProductInfo);
+      const result = await cartCollection.insertOne(cartProductInfo)
+      res.send(result)
+    })
+    // ========================================   cart collection end    ========================================
 
 
 
