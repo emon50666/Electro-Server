@@ -38,6 +38,7 @@ async function run() {
     const productCollection = client.db('ElectroMart').collection('products')
     const cartCollection = client.db('ElectroMart').collection('carts')
     const userCollection = client.db('ElectroMart').collection('users')
+    const compareCollection = client.db('ElectroMart').collection('compares')
 
 
 
@@ -105,6 +106,28 @@ async function run() {
       res.send(result)
     })
     // ========================================   cart collection end    ========================================
+
+
+    // ========================================   compare collection start     ========================================
+    app.get("/compares", async (req, res) => {
+      const result = await compareCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/compares', async (req, res) => {
+      const CompareProductInfo = req.body;
+      console.log(CompareProductInfo);
+      const result = await compareCollection.insertOne(CompareProductInfo)
+      res.send(result)
+    })
+
+    app.delete("/compares/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await compareCollection.deleteOne(query);
+      res.send(result)
+    })
+    // ========================================   compare collection end    ========================================
 
 
 
