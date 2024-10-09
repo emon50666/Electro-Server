@@ -59,8 +59,28 @@ async function run() {
       res.send(result)
     })
     // ========================================   product collection end    ========================================
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.findOne(query);
+      res.send(result)
+
+    })
 
 
+    // ========================================   get all product data form db and pagination and search    ========================================
+
+  app.get('/products',async(req,res)=>{
+    // search
+    const search = req.query.search
+    // search 
+    let query = {
+     title: { $regex: search,$options: 'i' }
+   }
+
+    const result = await productCollection.find(query).toArray();
+    res.send(result)
+  })
 
 
 
