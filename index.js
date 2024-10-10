@@ -39,6 +39,7 @@ async function run() {
     const cartCollection = client.db('ElectroMart').collection('carts')
     const userCollection = client.db('ElectroMart').collection('users')
     const compareCollection = client.db('ElectroMart').collection('compares')
+    const categoryCollection = client.db('ElectroMart').collection('categories')
 
 
 
@@ -50,7 +51,6 @@ async function run() {
 
     app.post('/products', async (req, res) => {
       const ProductData = req.body;
-      console.log(ProductData);
       const result = await productCollection.insertOne(ProductData)
       res.send(result)
     })
@@ -95,7 +95,6 @@ async function run() {
 
     app.post('/carts', async (req, res) => {
       const cartProductInfo = req.body;
-      console.log(cartProductInfo);
       const result = await cartCollection.insertOne(cartProductInfo)
       res.send(result)
     })
@@ -117,7 +116,6 @@ async function run() {
 
     app.post('/compares', async (req, res) => {
       const CompareProductInfo = req.body;
-      console.log(CompareProductInfo);
       const result = await compareCollection.insertOne(CompareProductInfo)
       res.send(result)
     })
@@ -131,21 +129,26 @@ async function run() {
     // ========================================   compare collection end    ========================================
 
 
-
-
-    app.get('/products',async(req,res)=>{
-      // search
-      const search = req.query.search
-      // search 
-      let query = {
-       title: { $regex: search,$options: 'i' }
-     }
-  
-      const result = await productCollection.find(query,options).toArray();
+    // ========================================   category collection start     ========================================
+    app.get("/categories", async (req, res) => {
+      const result = await categoryCollection.find().toArray();
       res.send(result)
     })
-  
-  
+
+    app.post('/categories', async (req, res) => {
+      const updateFormInfo = req.body;
+      const result = await categoryCollection.insertOne(updateFormInfo)
+      res.send(result)
+    })
+
+    app.delete("/categories/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await categoryCollection.deleteOne(query);
+      res.send(result)
+    })
+    // ========================================   category collection end    ========================================
+
 
 
 
