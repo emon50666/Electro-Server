@@ -76,13 +76,7 @@ async function run() {
       res.send(result)
     })
     // ========================================   product collection end    ========================================
-    app.get('/products/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await productCollection.findOne(query);
-      res.send(result)
 
-    })
 
 
     // =================================== user collection start ===================================
