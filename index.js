@@ -39,6 +39,7 @@ async function run() {
     const cartCollection = client.db('ElectroMart').collection('carts')
     const userCollection = client.db('ElectroMart').collection('users')
     const compareCollection = client.db('ElectroMart').collection('compares')
+    const wishlistCollection = client.db('ElectroMart').collection('wishlist')
 
 
 
@@ -76,13 +77,13 @@ async function run() {
       res.send(result)
     })
     // ========================================   product collection end    ========================================
-    app.get('/products/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const result = await productCollection.findOne(query);
-      res.send(result)
+    // app.get('/products/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) }
+    //   const result = await productCollection.findOne(query);
+    //   res.send(result)
 
-    })
+    // })
 
 
     // =================================== user collection start ===================================
@@ -134,8 +135,25 @@ async function run() {
       const result = await compareCollection.deleteOne(query);
       res.send(result)
     })
-    // ========================================   compare collection end    ========================================
 
+
+    // ========================================   Wishlist collection start     ========================================
+    app.get("/wishlist", async (req, res) => {
+      const result = await wishlistCollection.find().toArray();
+      res.send(result)
+    })
+    
+    app.post('/wishlist', async (req, res) => {
+      const WishlistProductInfo = req.body;
+      console.log(WishlistProductInfo);
+      const result = await wishlistCollection.insertOne(WishlistProductInfo)
+      res.send(result)
+    })
+
+
+
+
+    // ========================================   Wishlist collection end    ========================================
 
 
 
