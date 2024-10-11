@@ -55,6 +55,39 @@ async function run() {
       res.send(result)
     })
 
+    app.put('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedProduct = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          title: updatedProduct.title,
+          shortDescription: updatedProduct.shortDescription,
+          fullDescription: updatedProduct.fullDescription,
+          images: updatedProduct.images,
+          quantity: updatedProduct.quantity,
+          brand: updatedProduct.brand,
+          category: updatedProduct.category,
+          isHot: updatedProduct.isHot,
+          isNew: updatedProduct.isNew,
+          discountPercentage: updatedProduct.discountPercentage,
+          discountPrice: updatedProduct.discountPrice,
+          price: updatedProduct.price,
+          addDate: updatedProduct.addDate
+        },
+      };
+
+      try {
+        const result = await productCollection.updateOne(filter, updateDoc, options);
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).send({ message: "Failed to update product", error });
+      }
+    });
+
+
     app.patch('/products/:id', async (req, res) => {
       const id = req.params.id;
       const { view } = req.body;
