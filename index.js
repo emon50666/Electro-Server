@@ -43,6 +43,7 @@ async function run() {
     const wishlistCollection = client.db('ElectroMart').collection('wishlist')
 
     const categoryCollection = client.db('ElectroMart').collection('categories')
+    const storeCollection = client.db('ElectroMart').collection('stores')
 
 
 
@@ -218,6 +219,26 @@ async function run() {
       res.send(result)
     })
     // ========================================   category collection end    ========================================
+
+    // ========================================   store collection start     ========================================
+    app.get("/stores", async (req, res) => {
+      const result = await storeCollection.find().toArray();
+      res.send(result)
+    })
+
+    app.post('/stores', async (req, res) => {
+      const storeInfo = req.body;
+      const result = await storeCollection.insertOne(storeInfo)
+      res.send(result)
+    })
+
+    app.delete("/stores/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await storeCollection.deleteOne(query);
+      res.send(result)
+    })
+    // ========================================   store collection end    ========================================
 
 
 
