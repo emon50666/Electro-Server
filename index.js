@@ -39,7 +39,10 @@ async function run() {
     const cartCollection = client.db('ElectroMart').collection('carts')
     const userCollection = client.db('ElectroMart').collection('users')
     const compareCollection = client.db('ElectroMart').collection('compares')
+
     const wishlistCollection = client.db('ElectroMart').collection('wishlist')
+
+    const categoryCollection = client.db('ElectroMart').collection('categories')
 
 
 
@@ -51,10 +54,42 @@ async function run() {
 
     app.post('/products', async (req, res) => {
       const ProductData = req.body;
-      console.log(ProductData);
       const result = await productCollection.insertOne(ProductData)
       res.send(result)
     })
+
+    app.put('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedProduct = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          title: updatedProduct.title,
+          shortDescription: updatedProduct.shortDescription,
+          fullDescription: updatedProduct.fullDescription,
+          images: updatedProduct.images,
+          quantity: updatedProduct.quantity,
+          brand: updatedProduct.brand,
+          category: updatedProduct.category,
+          isHot: updatedProduct.isHot,
+          isNew: updatedProduct.isNew,
+          discountPercentage: updatedProduct.discountPercentage,
+          discountPrice: updatedProduct.discountPrice,
+          price: updatedProduct.price,
+          addDate: updatedProduct.addDate
+        },
+      };
+
+      try {
+        const result = await productCollection.updateOne(filter, updateDoc, options);
+        res.send(result);
+      } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).send({ message: "Failed to update product", error });
+      }
+    });
+
 
     app.patch('/products/:id', async (req, res) => {
       const id = req.params.id;
@@ -77,6 +112,7 @@ async function run() {
       res.send(result)
     })
     // ========================================   product collection end    ========================================
+
     // app.get('/products/:id', async (req, res) => {
     //   const id = req.params.id;
     //   const query = { _id: new ObjectId(id) }
@@ -84,6 +120,9 @@ async function run() {
     //   res.send(result)
 
     // })
+
+
+
 
 
     // =================================== user collection start ===================================
@@ -102,7 +141,6 @@ async function run() {
 
     app.post('/carts', async (req, res) => {
       const cartProductInfo = req.body;
-      console.log(cartProductInfo);
       const result = await cartCollection.insertOne(cartProductInfo)
       res.send(result)
     })
@@ -124,7 +162,6 @@ async function run() {
 
     app.post('/compares', async (req, res) => {
       const CompareProductInfo = req.body;
-      console.log(CompareProductInfo);
       const result = await compareCollection.insertOne(CompareProductInfo)
       res.send(result)
     })
@@ -135,6 +172,7 @@ async function run() {
       const result = await compareCollection.deleteOne(query);
       res.send(result)
     })
+
 
 
     // ========================================   Wishlist collection start     ========================================
@@ -160,22 +198,27 @@ async function run() {
 
 
     // ========================================   Wishlist collection end    ========================================
-
-
-
-    app.get('/products',async(req,res)=>{
-      // search
-      const search = req.query.search
-      // search 
-      let query = {
-       title: { $regex: search,$options: 'i' }
-     }
-  
-      const result = await productCollection.find(query,options).toArray();
+    // ========================================   category collection start     ========================================
+    app.get("/categories", async (req, res) => {
+      const result = await categoryCollection.find().toArray();
       res.send(result)
     })
-  
-  
+
+
+    app.post('/categories', async (req, res) => {
+      const updateFormInfo = req.body;
+      const result = await categoryCollection.insertOne(updateFormInfo)
+      res.send(result)
+    })
+
+    app.delete("/categories/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await categoryCollection.deleteOne(query);
+      res.send(result)
+    })
+    // ========================================   category collection end    ========================================
+
 
 
 
