@@ -181,14 +181,13 @@ async function run() {
       const result = await wishlistCollection.find().toArray();
       res.send(result)
     })
-    
+
     app.post('/wishlist', async (req, res) => {
       const WishlistProductInfo = req.body;
       console.log(WishlistProductInfo);
       const result = await wishlistCollection.insertOne(WishlistProductInfo)
       res.send(result)
     })
-
 
     app.delete("/wishlist/:id", async (req, res) => {
       const id = req.params.id;
@@ -231,6 +230,25 @@ async function run() {
       const result = await storeCollection.insertOne(storeInfo)
       res.send(result)
     })
+
+    app.put('/stores/:id', async (req, res) => {
+      const id = req.params.id;
+      const storeInfo = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          shopName: storeInfo.shopName,
+          shopAddress: storeInfo.shopAddress,
+          shopContactNumber: storeInfo.shopContactNumber,
+          shortDescription: storeInfo.shortDescription,
+          operatingHours: storeInfo.operatingHours,
+          image: storeInfo.image
+        },
+      };
+      const result = await storeCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
 
     app.delete("/stores/:id", async (req, res) => {
       const id = req.params.id;
