@@ -268,6 +268,13 @@ async function run() {
       const result = await promotionCollection.insertOne(promotionProductInfo)
       res.send(result)
     })
+
+    app.delete("/promotions/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await promotionCollection.deleteOne(query);
+      res.send(result)
+    })
     // ========================================   cart collection end    ========================================
 
 
