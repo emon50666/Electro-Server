@@ -39,11 +39,10 @@ async function run() {
     const cartCollection = client.db('ElectroMart').collection('carts')
     const userCollection = client.db('ElectroMart').collection('users')
     const compareCollection = client.db('ElectroMart').collection('compares')
-
     const wishlistCollection = client.db('ElectroMart').collection('wishlist')
-
     const categoryCollection = client.db('ElectroMart').collection('categories')
     const storeCollection = client.db('ElectroMart').collection('stores')
+    const promotionCollection = client.db('ElectroMart').collection('promotions')
 
 
 
@@ -257,6 +256,27 @@ async function run() {
       res.send(result)
     })
     // ========================================   store collection end    ========================================
+
+    // ========================================   cart collection start     ========================================
+    app.post('/promotions', async (req, res) => {
+      const promotionProductInfo = req.body;
+      const result = await promotionCollection.insertOne(promotionProductInfo)
+      res.send(result)
+    })
+    // ========================================   cart collection end    ========================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
