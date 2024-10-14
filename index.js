@@ -258,6 +258,11 @@ async function run() {
     // ========================================   store collection end    ========================================
 
     // ========================================   cart collection start     ========================================
+    app.get("/promotions", async (req, res) => {
+      const result = await promotionCollection.find().toArray();
+      res.send(result)
+    })
+
     app.post('/promotions', async (req, res) => {
       const promotionProductInfo = req.body;
       const result = await promotionCollection.insertOne(promotionProductInfo)
