@@ -128,28 +128,74 @@ async function run() {
     // =================================== user collection start ===================================
     // save a data in mongodb 
 
-    app.put('/user',async(req,res)=>{
-      const user = req.body;
-      const query = {email: user?.email}
-      // check if user already exist in db 
-      const isExist =  await userCollection.findOne(query)
-      if(isExist) return res.send(isExist)
+    // app.put('/user',async(req,res)=>{
+    //   const user = req.body;
+    //   const query = {email: user?.email}
+    //   // check if user already exist in db 
+    //   const isExist =  await userCollection.findOne(query)
+    //   if(isExist) return res.send(isExist)
 
-      const options = {upsert: true}
+    //   const options = {upsert: true}
     
-      const updateDoc={
+    //   const updateDoc={
+    //     $set:{
+    //       ...user,
+    //       Timestamp: Date.now()
+    //     }
+
+    //   }
+    //   const result = await userCollection.updateOne(query,updateDoc,options)
+    //   res.send(result)
+    // })
+
+    app.put('/user', async (req, res) => {
+      const user = req.body;
+      console.log("User Data Received:", user); // Check what is being sent from the frontend
+    
+      if (!user || !user.email) {
+        return res.status(400).send({ error: "Invalid user data" });
+      }
+    
+      const query = { email: user.email };
+      const isExist = await userCollection.findOne(query);
+      if (isExist) return res.send(isExist);
+    
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          ...user,
+          Timestamp: Date.now(),
+        },
+      };
+      const result = await userCollection.updateOne(query, updateDoc, options);
+      res.send(result);
+    });
+    
+
+
+    // update user role 
+    app.patch('/users/update/:email',async(req,res)=>{
+      const email = req.params.email;
+      const user = req.body;
+      const query = {email};
+      const updateDoc = {
         $set:{
           ...user,
-          Timestamp: Date.now()
+          Timestamp:Date.now()
         }
-
       }
-      const result = await userCollection.updateOne(query,updateDoc,options)
+      const result = await userCollection.updateOne(query,updateDoc)
       res.send(result)
     })
 
 
 
+//  get a user info by email form db
+    app.get('/user/:email',async(req,res)=>{
+      const email = req.params.email;
+      const result = await userCollection.findOne({email})
+      res.send(result)
+    })
 
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
