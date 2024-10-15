@@ -1,5 +1,5 @@
 const express = require("express")
-const { MongoClient, ServerApiVersion, Collection, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, Collection, ObjectId, Timestamp } = require('mongodb');
 const cors = require("cors")
 const cookieParser = require("cookie-parser");
 require('dotenv').config()
@@ -127,6 +127,31 @@ async function run() {
 
 
     // =================================== user collection start ===================================
+    // save a data in mongodb 
+
+    app.put('/user',async(req,res)=>{
+      const user = req.body;
+      const query = {email: user?.email}
+      // check if user already exist in db 
+      const isExist =  await userCollection.findOne(query)
+      if(isExist) return res.send(isExist)
+
+      const options = {upsert: true}
+    
+      const updateDoc={
+        $set:{
+          ...user,
+          Timestamp: Date.now()
+        }
+
+      }
+      const result = await userCollection.updateOne(query,updateDoc,options)
+      res.send(result)
+    })
+
+
+
+
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result)
