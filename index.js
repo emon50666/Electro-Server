@@ -91,7 +91,7 @@ async function run() {
     });
 
 
-    app.patch('/products/:id', async (req, res) => {
+    app.patch('/productView/:id', async (req, res) => {
       const id = req.params.id;
       const { view } = req.body;
       const options = { upsert: true };
@@ -102,6 +102,20 @@ async function run() {
         },
       };
       const result = await productCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    })
+
+
+    app.patch('/productQuantity/:id', async (req, res) => {
+      const id = req.params.id;
+      const { updatedQuantity } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          quantity: updatedQuantity,
+        },
+      };
+      const result = await productCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
 
