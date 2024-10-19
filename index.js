@@ -8,7 +8,7 @@ const app = express()
 
 // middle ware 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: ['http://localhost:5173', 'http://localhost:5174','https://spectacular-stardust-c34d34.netlify.app'],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -43,12 +43,21 @@ async function run() {
     const categoryCollection = client.db('ElectroMart').collection('categories')
     const storeCollection = client.db('ElectroMart').collection('stores')
     const promotionCollection = client.db('ElectroMart').collection('promotions')
+    const reviewCollection = client.db('ElectroMart').collection('reviews')
+
 
 
 
     // ========================================   product collection start    ========================================
     app.get('/products', async (req, res) => {
       const result = await productCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await productCollection.findOne(query);
       res.send(result);
     })
 
@@ -363,7 +372,19 @@ async function run() {
     // ========================================   cart collection end    ========================================
 
 
+    // ========================================   reviews start     ========================================
 
+ app.post('/reviews',async(req,res)=>{
+  const reviewData = req.body;
+  const result = await reviewCollection.insertOne(reviewData)
+  res.send(result)
+ })
+
+//  get review data 
+app.get('/review',async(req,res)=>{
+  const result = await reviewCollection.find().toArray();
+  res.send(result)
+})
 
 
 
