@@ -8,7 +8,7 @@ const app = express()
 
 // middle ware 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', "electro-mart-33849.web.app", "electro-mart-33849.firebaseapp.com"],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -150,7 +150,7 @@ async function run() {
     //   if(isExist) return res.send(isExist)
 
     //   const options = {upsert: true}
-    
+
     //   const updateDoc={
     //     $set:{
     //       ...user,
@@ -165,15 +165,15 @@ async function run() {
     app.put('/user', async (req, res) => {
       const user = req.body;
       console.log("User Data Received:", user); // Check what is being sent from the frontend
-    
+
       if (!user || !user.email) {
         return res.status(400).send({ error: "Invalid user data" });
       }
-    
+
       const query = { email: user.email };
       const isExist = await userCollection.findOne(query);
       if (isExist) return res.send(isExist);
-    
+
       const options = { upsert: true };
       const updateDoc = {
         $set: {
@@ -184,30 +184,30 @@ async function run() {
       const result = await userCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
-    
+
 
 
     // update user role 
-    app.patch('/users/update/:email',async(req,res)=>{
+    app.patch('/users/update/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
-      const query = {email};
+      const query = { email };
       const updateDoc = {
-        $set:{
+        $set: {
           ...user,
-          Timestamp:Date.now()
+          Timestamp: Date.now()
         }
       }
-      const result = await userCollection.updateOne(query,updateDoc)
+      const result = await userCollection.updateOne(query, updateDoc)
       res.send(result)
     })
 
 
 
-//  get a user info by email form db
-    app.get('/user/:email',async(req,res)=>{
+    //  get a user info by email form db
+    app.get('/user/:email', async (req, res) => {
       const email = req.params.email;
-      const result = await userCollection.findOne({email})
+      const result = await userCollection.findOne({ email })
       res.send(result)
     })
 
@@ -380,7 +380,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
