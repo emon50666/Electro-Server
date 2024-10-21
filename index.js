@@ -376,9 +376,12 @@ async function run() {
       res.send(result);
     })
 
-
-
-
+    app.delete('/banners/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await sliderCollection.deleteOne(query);
+      res.send(result);
+    })
     // ========================================   slider collection end    ========================================
 
 
