@@ -43,6 +43,7 @@ async function run() {
     const categoryCollection = client.db('ElectroMart').collection('categories')
     const storeCollection = client.db('ElectroMart').collection('stores')
     const promotionCollection = client.db('ElectroMart').collection('promotions')
+    const sliderCollection = client.db('ElectroMart').collection('sliders')
 
 
 
@@ -363,11 +364,16 @@ async function run() {
     // ========================================   cart collection end    ========================================
 
 
+    // ========================================   slider collection end    ========================================
+    app.get('/banners', async (req, res) => {
+      const result = await sliderCollection.find().toArray();
+      res.send(result);
+    })
 
 
 
 
-
+    // ========================================   slider collection end    ========================================
 
 
 
