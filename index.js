@@ -370,6 +370,12 @@ async function run() {
       res.send(result);
     })
 
+    app.post('/banners', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await sliderCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
 
 
 
