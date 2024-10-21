@@ -8,7 +8,7 @@ const app = express()
 
 // middle ware 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174','https://spectacular-stardust-c34d34.netlify.app'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://spectacular-stardust-c34d34.netlify.app'],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -43,8 +43,8 @@ async function run() {
     const categoryCollection = client.db('ElectroMart').collection('categories')
     const storeCollection = client.db('ElectroMart').collection('stores')
     const promotionCollection = client.db('ElectroMart').collection('promotions')
+    const sliderCollection = client.db('ElectroMart').collection('sliders')
     const reviewCollection = client.db('ElectroMart').collection('reviews')
-
 
 
 
@@ -56,7 +56,7 @@ async function run() {
 
     app.get('/products/:id', async (req, res) => {
       const id = req.params.id
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await productCollection.findOne(query);
       res.send(result);
     })
@@ -159,7 +159,7 @@ async function run() {
     //   if(isExist) return res.send(isExist)
 
     //   const options = {upsert: true}
-    
+
     //   const updateDoc={
     //     $set:{
     //       ...user,
@@ -174,15 +174,15 @@ async function run() {
     app.put('/user', async (req, res) => {
       const user = req.body;
       console.log("User Data Received:", user); // Check what is being sent from the frontend
-    
+
       if (!user || !user.email) {
         return res.status(400).send({ error: "Invalid user data" });
       }
-    
+
       const query = { email: user.email };
       const isExist = await userCollection.findOne(query);
       if (isExist) return res.send(isExist);
-    
+
       const options = { upsert: true };
       const updateDoc = {
         $set: {
@@ -193,30 +193,30 @@ async function run() {
       const result = await userCollection.updateOne(query, updateDoc, options);
       res.send(result);
     });
-    
+
 
 
     // update user role 
-    app.patch('/users/update/:email',async(req,res)=>{
+    app.patch('/users/update/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
-      const query = {email};
+      const query = { email };
       const updateDoc = {
-        $set:{
+        $set: {
           ...user,
-          Timestamp:Date.now()
+          Timestamp: Date.now()
         }
       }
-      const result = await userCollection.updateOne(query,updateDoc)
+      const result = await userCollection.updateOne(query, updateDoc)
       res.send(result)
     })
 
 
 
-//  get a user info by email form db
-    app.get('/user/:email',async(req,res)=>{
+    //  get a user info by email form db
+    app.get('/user/:email', async (req, res) => {
       const email = req.params.email;
-      const result = await userCollection.findOne({email})
+      const result = await userCollection.findOne({ email })
       res.send(result)
     })
 
@@ -372,23 +372,39 @@ async function run() {
     // ========================================   cart collection end    ========================================
 
 
+
+    // ========================================   slider collection end    ========================================
+    app.get('/banners', async (req, res) => {
+      const result = await sliderCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.post('/banners', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await sliderCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
+    app.delete('/banners/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await sliderCollection.deleteOne(query);
+      res.send(result);
+    })
     // ========================================   reviews start     ========================================
+    app.post('/reviews', async (req, res) => {
+      const reviewData = req.body;
+      const result = await reviewCollection.insertOne(reviewData)
+      res.send(result)
+    })
 
- app.post('/reviews',async(req,res)=>{
-  const reviewData = req.body;
-  const result = await reviewCollection.insertOne(reviewData)
-  res.send(result)
- })
+    //  get review data 
+    app.get('/review', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result)
+    })
 
-//  get review data 
-app.get('/review',async(req,res)=>{
-  const result = await reviewCollection.find().toArray();
-  res.send(result)
-})
-
-
-
-
+    // ========================================   slider collection end    ========================================
 
 
 
@@ -401,7 +417,7 @@ app.get('/review',async(req,res)=>{
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
