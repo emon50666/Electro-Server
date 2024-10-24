@@ -149,28 +149,6 @@ async function run() {
 
 
     // =================================== user collection start ===================================
-    // save a data in mongodb 
-
-    // app.put('/user',async(req,res)=>{
-    //   const user = req.body;
-    //   const query = {email: user?.email}
-    //   // check if user already exist in db 
-    //   const isExist =  await userCollection.findOne(query)
-    //   if(isExist) return res.send(isExist)
-
-    //   const options = {upsert: true}
-
-    //   const updateDoc={
-    //     $set:{
-    //       ...user,
-    //       Timestamp: Date.now()
-    //     }
-
-    //   }
-    //   const result = await userCollection.updateOne(query,updateDoc,options)
-    //   res.send(result)
-    // })
-
     app.put('/user', async (req, res) => {
       const user = req.body;
       console.log("User Data Received:", user); // Check what is being sent from the frontend
@@ -192,6 +170,25 @@ async function run() {
       };
       const result = await userCollection.updateOne(query, updateDoc, options);
       res.send(result);
+    });
+
+    app.put('/user/:email', async (req, res) => {
+      try {
+        const email = req.params.email;
+        const userInfo = req.body;
+        const filter = { email: email };
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: {
+            ...userInfo,
+          }
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+        res.send(result);
+      } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).send({ message: 'Error updating user information', error });
+      }
     });
 
 
