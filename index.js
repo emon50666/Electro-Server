@@ -8,7 +8,7 @@ const app = express()
 
 // middle ware 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://spectacular-stardust-c34d34.netlify.app'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://dulcet-biscotti-e5c144.netlify.app'],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -45,6 +45,8 @@ async function run() {
     const promotionCollection = client.db('ElectroMart').collection('promotions')
     const sliderCollection = client.db('ElectroMart').collection('sliders')
     const reviewCollection = client.db('ElectroMart').collection('reviews')
+    const checkoutCollection = client.db('ElectroMart').collection('checkout')
+
 
 
 
@@ -417,6 +419,15 @@ app.get('/review',async(req,res)=>{
 
     // ========================================   slider collection end    ========================================
 
+
+    // ========================================   Checkout page api    ========================================
+
+ app.post('/checkout',async(req,res)=>{
+  const checkoutData = req.body;
+  const result = await checkoutCollection.insertOne(checkoutData).toArray()
+  res.send(result)
+
+ })
 
 
 
