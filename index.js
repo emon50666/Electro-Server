@@ -47,6 +47,8 @@ async function run() {
     const checkoutCollection = client.db('ElectroMart').collection('checkout')
     const sliderCollection = client.db('ElectroMart').collection('sliders')
     const rightTopSliderCollection = client.db('ElectroMart').collection('rightTopSliders')
+    const rightBottomLCollection = client.db('ElectroMart').collection('rightBottomLSliders')
+    const rightBottomRCollection = client.db('ElectroMart').collection('rightBottomRSliders')
 
 
 
@@ -381,6 +383,11 @@ async function run() {
 
     app.get('/rightTop', async (req, res) => {
       const result = await rightTopSliderCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/rightBottomL', async (req, res) => {
+      const result = await rightBottomLCollection.find().toArray();
       res.send(result);
     })
 
