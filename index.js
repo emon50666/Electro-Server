@@ -192,6 +192,7 @@ async function run() {
         res.status(500).send({ message: 'Error updating user information', error });
       }
     });
+  
 
 
 
@@ -420,8 +421,8 @@ app.get('/review',async(req,res)=>{
     // ========================================   Checkout page api    ========================================
 
  app.post('/checkout',async(req,res)=>{
-  const checkoutData = req.body;
-  const result = await checkoutCollection.insertOne(checkoutData).toArray()
+  const formData = req.body;
+  const result = await checkoutCollection.insertOne(formData)
   res.send(result)
 
  })
