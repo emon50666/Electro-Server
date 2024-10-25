@@ -43,9 +43,10 @@ async function run() {
     const categoryCollection = client.db('ElectroMart').collection('categories')
     const storeCollection = client.db('ElectroMart').collection('stores')
     const promotionCollection = client.db('ElectroMart').collection('promotions')
-    const sliderCollection = client.db('ElectroMart').collection('sliders')
     const reviewCollection = client.db('ElectroMart').collection('reviews')
     const checkoutCollection = client.db('ElectroMart').collection('checkout')
+    const sliderCollection = client.db('ElectroMart').collection('sliders')
+    const rightTopSliderCollection = client.db('ElectroMart').collection('rightTopSliders')
 
 
 
@@ -378,6 +379,11 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/rightTop', async (req, res) => {
+      const result = await rightTopSliderCollection.find().toArray();
+      res.send(result);
+    })
+
     app.post('/banners', async (req, res) => {
       const bannerInfo = req.body;
       const result = await sliderCollection.insertOne(bannerInfo);
@@ -397,17 +403,17 @@ async function run() {
       res.send(result)
     })
 
- app.post('/reviews',async(req,res)=>{
-  const reviewData = req.body;
-  const result = await reviewCollection.insertOne(reviewData)
-  res.send(result)
- })
+    app.post('/reviews', async (req, res) => {
+      const reviewData = req.body;
+      const result = await reviewCollection.insertOne(reviewData)
+      res.send(result)
+    })
 
-//  get review data 
-app.get('/review',async(req,res)=>{
-  const result = await reviewCollection.find().toArray();
-  res.send(result)
-})
+    //  get review data 
+    app.get('/review', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result)
+    })
     //  get review data 
     app.get('/review', async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -419,12 +425,12 @@ app.get('/review',async(req,res)=>{
 
     // ========================================   Checkout page api    ========================================
 
- app.post('/checkout',async(req,res)=>{
-  const checkoutData = req.body;
-  const result = await checkoutCollection.insertOne(checkoutData).toArray()
-  res.send(result)
+    app.post('/checkout', async (req, res) => {
+      const checkoutData = req.body;
+      const result = await checkoutCollection.insertOne(checkoutData).toArray()
+      res.send(result)
 
- })
+    })
 
 
 
