@@ -408,6 +408,12 @@ async function run() {
       res.send(result);
     })
 
+    app.post('/rightBottomL', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await rightBottomLCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
     app.delete('/banners/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
