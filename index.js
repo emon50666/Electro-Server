@@ -402,6 +402,12 @@ async function run() {
       res.send(result);
     })
 
+    app.post('/rightTop', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await rightTopSliderCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
     app.delete('/banners/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
