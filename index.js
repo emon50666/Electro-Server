@@ -433,6 +433,13 @@ async function run() {
       const result = await rightTopSliderCollection.deleteOne(query);
       res.send(result);
     })
+
+    app.delete('/rightBottomL/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await rightBottomLCollection.deleteOne(query);
+      res.send(result);
+    })
     // ========================================   reviews start     ========================================
     app.post('/reviews', async (req, res) => {
       const reviewData = req.body;
