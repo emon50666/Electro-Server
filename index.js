@@ -391,6 +391,11 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/rightBottomR', async (req, res) => {
+      const result = await rightBottomRCollection.find().toArray();
+      res.send(result);
+    })
+
     app.post('/banners', async (req, res) => {
       const bannerInfo = req.body;
       const result = await sliderCollection.insertOne(bannerInfo);
