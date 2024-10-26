@@ -43,9 +43,14 @@ async function run() {
     const categoryCollection = client.db('ElectroMart').collection('categories')
     const storeCollection = client.db('ElectroMart').collection('stores')
     const promotionCollection = client.db('ElectroMart').collection('promotions')
-    const sliderCollection = client.db('ElectroMart').collection('sliders')
     const reviewCollection = client.db('ElectroMart').collection('reviews')
     const checkoutCollection = client.db('ElectroMart').collection('checkout')
+    const sliderCollection = client.db('ElectroMart').collection('sliders')
+    const rightTopSliderCollection = client.db('ElectroMart').collection('rightTopSliders')
+    const rightBottomLCollection = client.db('ElectroMart').collection('rightBottomLSliders')
+    const rightBottomRCollection = client.db('ElectroMart').collection('rightBottomRSliders')
+    const locationCollection = client.db('ElectroMart').collection('location')
+
 
 
 
@@ -379,9 +384,42 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/rightTop', async (req, res) => {
+      const result = await rightTopSliderCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/rightBottomL', async (req, res) => {
+      const result = await rightBottomLCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.get('/rightBottomR', async (req, res) => {
+      const result = await rightBottomRCollection.find().toArray();
+      res.send(result);
+    })
+
     app.post('/banners', async (req, res) => {
       const bannerInfo = req.body;
       const result = await sliderCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
+    app.post('/rightTop', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await rightTopSliderCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
+    app.post('/rightBottomL', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await rightBottomLCollection.insertOne(bannerInfo);
+      res.send(result);
+    })
+
+    app.post('/rightBottomR', async (req, res) => {
+      const bannerInfo = req.body;
+      const result = await rightBottomRCollection.insertOne(bannerInfo);
       res.send(result);
     })
 
@@ -391,6 +429,27 @@ async function run() {
       const result = await sliderCollection.deleteOne(query);
       res.send(result);
     })
+
+    app.delete('/rightTop/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await rightTopSliderCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.delete('/rightBottomL/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await rightBottomLCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.delete('/rightBottomR/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await rightBottomRCollection.deleteOne(query);
+      res.send(result);
+    })
     // ========================================   reviews start     ========================================
     app.post('/reviews', async (req, res) => {
       const reviewData = req.body;
@@ -398,17 +457,17 @@ async function run() {
       res.send(result)
     })
 
- app.post('/reviews',async(req,res)=>{
-  const reviewData = req.body;
-  const result = await reviewCollection.insertOne(reviewData)
-  res.send(result)
- })
+    app.post('/reviews', async (req, res) => {
+      const reviewData = req.body;
+      const result = await reviewCollection.insertOne(reviewData)
+      res.send(result)
+    })
 
-//  get review data 
-app.get('/review',async(req,res)=>{
-  const result = await reviewCollection.find().toArray();
-  res.send(result)
-})
+    //  get review data 
+    app.get('/review', async (req, res) => {
+      const result = await reviewCollection.find().toArray();
+      res.send(result)
+    })
     //  get review data 
     app.get('/review', async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -425,8 +484,14 @@ app.get('/review',async(req,res)=>{
   const result = await checkoutCollection.insertOne(formData)
   res.send(result)
 
- })
+    })
 
+    //  location api 
+    app.get('/locations',async(req,res)=>{
+      const result = await locationCollection.find().toArray();
+      res.send(result)
+
+    })
 
 
 
