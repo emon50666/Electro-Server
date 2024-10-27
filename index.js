@@ -8,7 +8,7 @@ const app = express()
 
 // middle ware 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://spectacular-stardust-c34d34.netlify.app'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://dulcet-biscotti-e5c144.netlify.app'],
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -45,6 +45,8 @@ async function run() {
     const promotionCollection = client.db('ElectroMart').collection('promotions')
     const sliderCollection = client.db('ElectroMart').collection('sliders')
     const reviewCollection = client.db('ElectroMart').collection('reviews')
+    const checkoutCollection = client.db('ElectroMart').collection('checkout')
+
 
 
 
@@ -149,28 +151,6 @@ async function run() {
 
 
     // =================================== user collection start ===================================
-    // save a data in mongodb 
-
-    // app.put('/user',async(req,res)=>{
-    //   const user = req.body;
-    //   const query = {email: user?.email}
-    //   // check if user already exist in db 
-    //   const isExist =  await userCollection.findOne(query)
-    //   if(isExist) return res.send(isExist)
-
-    //   const options = {upsert: true}
-
-    //   const updateDoc={
-    //     $set:{
-    //       ...user,
-    //       Timestamp: Date.now()
-    //     }
-
-    //   }
-    //   const result = await userCollection.updateOne(query,updateDoc,options)
-    //   res.send(result)
-    // })
-
     app.put('/user', async (req, res) => {
       const user = req.body;
       console.log("User Data Received:", user); // Check what is being sent from the frontend
@@ -192,6 +172,25 @@ async function run() {
       };
       const result = await userCollection.updateOne(query, updateDoc, options);
       res.send(result);
+    });
+
+    app.put('/user/:email', async (req, res) => {
+      try {
+        const email = req.params.email;
+        const userInfo = req.body;
+        const filter = { email: email };
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: {
+            ...userInfo,
+          }
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+        res.send(result);
+      } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).send({ message: 'Error updating user information', error });
+      }
     });
 
 
@@ -398,6 +397,17 @@ async function run() {
       res.send(result)
     })
 
+ app.post('/reviews',async(req,res)=>{
+  const reviewData = req.body;
+  const result = await reviewCollection.insertOne(reviewData)
+  res.send(result)
+ })
+
+//  get review data 
+app.get('/review',async(req,res)=>{
+  const result = await reviewCollection.find().toArray();
+  res.send(result)
+})
     //  get review data 
     app.get('/review', async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -406,6 +416,15 @@ async function run() {
 
     // ========================================   slider collection end    ========================================
 
+
+    // ========================================   Checkout page api    ========================================
+
+ app.post('/checkout',async(req,res)=>{
+  const checkoutData = req.body;
+  const result = await checkoutCollection.insertOne(checkoutData).toArray()
+  res.send(result)
+
+ })
 
 
 
