@@ -21,8 +21,6 @@ app.use(cookieParser())
 
 
 const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_SECRET_API_KEY}@cluster0.mbvqn67.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -143,18 +141,6 @@ async function run() {
     })
     // ========================================   product collection end    ========================================
 
-    // app.get('/products/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) }
-    //   const result = await productCollection.findOne(query);
-    //   res.send(result)
-
-    // })
-
-
-
-
-
     // =================================== user collection start ===================================
     app.put('/user', async (req, res) => {
       const user = req.body;
@@ -197,11 +183,7 @@ async function run() {
         res.status(500).send({ message: 'Error updating user information', error });
       }
     });
-  
 
-
-
-    // update user role 
     app.patch('/users/update/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
@@ -214,6 +196,20 @@ async function run() {
       }
       const result = await userCollection.updateOne(query, updateDoc)
       res.send(result)
+    })
+
+    app.patch('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const { subtotal } = req.body;
+      const filter = { email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          userSubtotal: subtotal,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     })
 
 
@@ -242,6 +238,44 @@ async function run() {
       const cartProductInfo = req.body;
       const result = await cartCollection.insertOne(cartProductInfo)
       res.send(result)
+    })
+
+    app.put("/cart/:id", async (req, res) => {
+      const { id } = req.params; // Access ID directly as a string
+      const { selectedQuantity, subtotal } = req.body;
+
+      try {
+        const result = await cartCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { selectedQuantity, subtotal } }
+        );
+
+        if (result.modifiedCount === 0) {
+          return res.status(404).json({ message: "Cart item not found" });
+        }
+
+        res.status(200).json({
+          message: "Cart item updated successfully",
+          data: { selectedQuantity, subtotal }
+        });
+      } catch (error) {
+        console.error("Failed to update cart item:", error);
+        res.status(500).json({ message: "Failed to update cart item", error });
+      }
+    });
+
+    app.patch("/carts/:id", async (req, res) => {
+      const id = req.params.id;
+      const { updatedSelectedQuantity, updatedSubtotal } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          selectedQuantity: updatedSelectedQuantity,
+          subtotal: updatedSubtotal,
+        },
+      };
+      const result = await cartCollection.updateOne(filter, updateDoc);
+      res.send(result);
     })
 
     app.delete("/carts/:id", async (req, res) => {
@@ -487,7 +521,7 @@ async function run() {
     })
 
     //  location api 
-    app.get('/locations',async(req,res)=>{
+    app.get('/locations', async (req, res) => {
       const result = await locationCollection.find().toArray();
       res.send(result)
 
@@ -502,6 +536,7 @@ async function run() {
  
       const product = await productCollection.findOne({_id: new ObjectId(req.body.productId) })
       console.log(product);
+       
 
       const data = {
         total_amount: 100,
@@ -533,6 +568,7 @@ async function run() {
         ship_postcode: 1000,
         ship_country: 'Bangladesh',
     };
+    console.log(data);
     // const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
     // sslcz.init(data).then(apiResponse => {
     //     // Redirect the user to payment gateway
