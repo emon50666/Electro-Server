@@ -141,18 +141,6 @@ async function run() {
     })
     // ========================================   product collection end    ========================================
 
-    // app.get('/products/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) }
-    //   const result = await productCollection.findOne(query);
-    //   res.send(result)
-
-    // })
-
-
-
-
-
     // =================================== user collection start ===================================
     app.put('/user', async (req, res) => {
       const user = req.body;
@@ -195,7 +183,7 @@ async function run() {
         res.status(500).send({ message: 'Error updating user information', error });
       }
     });
-  
+
 
 
 
@@ -265,6 +253,20 @@ async function run() {
         res.status(500).json({ message: "Failed to update cart item", error });
       }
     });
+
+    app.patch("/carts/:id", async (req, res) => {
+      const id = req.params.id;
+      const { updatedSelectedQuantity, updatedSubtotal } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          selectedQuantity: updatedSelectedQuantity,
+          subtotal: updatedSubtotal,
+        },
+      };
+      const result = await cartCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
 
     app.delete("/carts/:id", async (req, res) => {
       const id = req.params.id;
@@ -501,15 +503,15 @@ async function run() {
 
     // ========================================   Checkout page api    ========================================
 
- app.post('/checkout',async(req,res)=>{
-  const formData = req.body;
-  const result = await checkoutCollection.insertOne(formData)
-  res.send(result)
+    app.post('/checkout', async (req, res) => {
+      const formData = req.body;
+      const result = await checkoutCollection.insertOne(formData)
+      res.send(result)
 
     })
 
     //  location api 
-    app.get('/locations',async(req,res)=>{
+    app.get('/locations', async (req, res) => {
       const result = await locationCollection.find().toArray();
       res.send(result)
 
