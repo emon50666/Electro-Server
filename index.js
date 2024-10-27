@@ -208,7 +208,7 @@ async function run() {
           userSubtotal: subtotal,
         },
       };
-      const result = await productCollection.updateOne(filter, updateDoc);
+      const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
     })
 
