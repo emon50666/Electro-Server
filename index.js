@@ -184,10 +184,6 @@ async function run() {
       }
     });
 
-
-
-
-    // update user role 
     app.patch('/users/update/:email', async (req, res) => {
       const email = req.params.email;
       const user = req.body;
@@ -200,6 +196,20 @@ async function run() {
       }
       const result = await userCollection.updateOne(query, updateDoc)
       res.send(result)
+    })
+
+    app.patch('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const { subtotal } = req.body;
+      const filter = { email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          userSubtotal: subtotal,
+        },
+      };
+      const result = await productCollection.updateOne(filter, updateDoc);
+      res.send(result);
     })
 
 
