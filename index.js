@@ -559,7 +559,7 @@ async function run() {
         currency: 'BDT',
         tran_id: String(tran_id), // use unique tran_id for each api call
         success_url: 'http://localhost:9000/success-payment',
-        fail_url: 'http://localhost:5173/fail',
+        fail_url: 'http://localhost:9000/fail',
         cancel_url: 'http://localhost:5173/cancel',
         ipn_url: 'http://localhost:5173/ipn',
         shipping_method: 'Courier',
@@ -567,7 +567,7 @@ async function run() {
         product_category: product?.category,
         product_profile: 'general',
         cus_name: formData?.name,
-        cus_email: 'emon50666@gmail.com',
+        cus_email: formData?.user?.email,
         cus_add1: formData?.address,
         cus_add2: formData?.district,
         cus_city: formData?.city,
@@ -605,6 +605,7 @@ async function run() {
         cus_phone: formData?.number,
         paymentId: String(tran_id),
         product_name: product?.title,
+        cus_email: formData?.user?.email,
         product_category: product?.category,
         shipping_method: formData?.shipping,
         cus_add1: formData?.address,
@@ -665,12 +666,7 @@ app.post('/cancel', async (req, res) => {
 })
 
 
-// app.get('/payments/:id',async(req,res)=>{
-//   const id = req.params.id
-//   const query = { _id: new ObjectId(id) }
-//   const result = await paymentCollection.findOne(query);
-//   res.send(result);
-// })
+
 
 app.get('/payments',async(req,res)=>{
  
