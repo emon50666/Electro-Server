@@ -1,22 +1,29 @@
 const express = require("express")
 const { MongoClient, ServerApiVersion, Collection, ObjectId, Timestamp } = require('mongodb');
 const cors = require("cors")
+
 const cookieParser = require("cookie-parser");
+const { default: axios } = require("axios");
 require('dotenv').config()
 const port = process.env.PORT || 9000
 const app = express()
 
 // middle ware 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://dulcet-biscotti-e5c144.netlify.app'],
+  origin: ['http://localhost:5173', ],
   credentials: true,
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded());
+
 app.use(cookieParser())
 
+// const store_id = 'elect671ce752b3f2b';
+// const store_passwd = 'elect671ce752b3f2b@ssl';
+// const is_live = false;  // Set to `true` for production
 
 
 
@@ -48,6 +55,8 @@ async function run() {
     const rightBottomLCollection = client.db('ElectroMart').collection('rightBottomLSliders')
     const rightBottomRCollection = client.db('ElectroMart').collection('rightBottomRSliders')
     const locationCollection = client.db('ElectroMart').collection('location')
+    const paymentCollection = client.db('ElectroMart').collection('payment')
+
 
 
 
@@ -144,7 +153,7 @@ async function run() {
     // =================================== user collection start ===================================
     app.put('/user', async (req, res) => {
       const user = req.body;
-      console.log("User Data Received:", user); // Check what is being sent from the frontend
+
 
       if (!user || !user.email) {
         return res.status(400).send({ error: "Invalid user data" });
@@ -513,12 +522,12 @@ async function run() {
 
     // ========================================   Checkout page api    ========================================
 
- app.post('/order',async(req,res)=>{
-  const formData = req.body;
-  const result = await checkoutCollection.insertOne(formData)
-  res.send(result)
+    //  app.post('/order',async(req,res)=>{
+    //   const formData = req.body;
+    //   const result = await checkoutCollection.insertOne(formData)
+    //   res.send(result)
 
-    })
+    //     })
 
     //  location api 
     app.get('/locations', async (req, res) => {
@@ -529,54 +538,145 @@ async function run() {
 
 
     // ========================================   Payment method api SSL E-commerce   ========================================
-      // create na new id every api call 
-      const tran_id = new ObjectId().toString()
-    app.post('/order',async(req,res)=>{
+    // create na new id every api call 
+    const tran_id = Math.floor(10000 + Math.random() * 90000); // Random 5-digit number
+   
+    app.post('/order', async (req, res) => {
+      const formData = req.body;
+      const result = await checkoutCollection.insertOne(formData)
+
+      console.log(formData);
       // calculation product price 
- 
-      const product = await productCollection.findOne({_id: new ObjectId(req.body.productId) })
+
+      const product = await productCollection.findOne({ _id: new ObjectId(req.body.getProductId) })
       console.log(product);
-       
+
 
       const data = {
-        total_amount: 100,
+        store_id: 'digit66759e8fe463b',
+        store_passwd: 'digit66759e8fe463b@ssl',
+        total_amount: formData?.totalAmount,
         currency: 'BDT',
-        tran_id: tran_id, // use unique tran_id for each api call
-        success_url: 'http://localhost:3030/success',
-        fail_url: 'http://localhost:3030/fail',
-        cancel_url: 'http://localhost:3030/cancel',
-        ipn_url: 'http://localhost:3030/ipn',
+        tran_id: String(tran_id), // use unique tran_id for each api call
+        success_url: 'http://localhost:9000/success-payment',
+        fail_url: 'http://localhost:5173/fail',
+        cancel_url: 'http://localhost:5173/cancel',
+        ipn_url: 'http://localhost:5173/ipn',
         shipping_method: 'Courier',
-        product_name: 'Computer.',
-        product_category: 'Electronic',
+        product_name: product?.title,
+        product_category: product?.category,
         product_profile: 'general',
-        cus_name: 'Customer Name',
-        cus_email: 'customer@example.com',
-        cus_add1: 'Dhaka',
-        cus_add2: 'Dhaka',
-        cus_city: 'Dhaka',
-        cus_state: 'Dhaka',
+        cus_name: formData?.name,
+        cus_email: 'emon50666@gmail.com',
+        cus_add1: formData?.address,
+        cus_add2: formData?.district,
+        cus_city: formData?.city,
+        cus_state: formData?.division,
         cus_postcode: '1000',
         cus_country: 'Bangladesh',
-        cus_phone: '01711111111',
+        cus_phone: formData?.number,
         cus_fax: '01711111111',
-        ship_name: 'Customer Name',
+        shipping_method: formData?.shipping,
+        payment_method:formData. paymentMethod,
         ship_add1: 'Dhaka',
         ship_add2: 'Dhaka',
         ship_city: 'Dhaka',
         ship_state: 'Dhaka',
         ship_postcode: 1000,
+        ship_name: 'Courier',
         ship_country: 'Bangladesh',
-    };
-    console.log(data);
-    // const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
-    // sslcz.init(data).then(apiResponse => {
-    //     // Redirect the user to payment gateway
-    //     let GatewayPageURL = apiResponse.GatewayPageURL
-    //     res.redirect(GatewayPageURL)
-    //     console.log('Redirecting to: ', GatewayPageURL)
-    // });
+      };
+      console.log(data);
+
+
+      //  post request sandbox
+      const response = await axios({
+        method: "POST",
+        url: 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php',
+        data: data,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      })
+
+      // save a payment data
+      const saveData = {
+        cus_name: formData?.name,
+        cus_phone: formData?.number,
+        paymentId: String(tran_id),
+        product_name: product?.title,
+        product_category: product?.category,
+        shipping_method: formData?.shipping,
+        cus_add1: formData?.address,
+        cus_add2: formData?.district,
+        cus_city: formData?.city,
+        cus_state: formData?.division,
+        payment_method:formData. paymentMethod,
+        amount: formData?.totalAmount,
+        status: 'pending'
+      }
+
+      const save = await paymentCollection.insertOne(saveData)
+      if (save) {
+        res.send({
+          paymentUrl: response.data.GatewayPageURL,
+          result
+        })
+      }
+
+      console.log(response);
+
+
     })
+
+    // success payment 
+
+    app.post('/success-payment', async (req, res) => {
+      const successData = req.body;
+      if(successData.status !== "VALID"){
+        throw new Error("unauthorize payment")
+      }
+
+      // update payment status
+      const query = {
+        paymentId: String(successData.tran_id), // Ensure matching tran_id type
+      };
+      const update={
+          $set:{
+            status: 'success'
+          }
+      }
+      const updateData = await paymentCollection.updateOne(query,update)
+      console.log('success data', successData);
+      console.log('updateData', updateData);
+
+      res.redirect('http://localhost:5173/success')
+
+    })
+
+// fail payment 
+app.post('/fail', async (req, res) => {
+  res.redirect('http://localhost:5173/fail')
+})
+
+// fail payment 
+app.post('/cancel', async (req, res) => {
+  res.redirect('http://localhost:5173/cancel')
+})
+
+
+// app.get('/payments/:id',async(req,res)=>{
+//   const id = req.params.id
+//   const query = { _id: new ObjectId(id) }
+//   const result = await paymentCollection.findOne(query);
+//   res.send(result);
+// })
+
+app.get('/payments',async(req,res)=>{
+ 
+  const result = await paymentCollection.find().toArray();
+  res.send(result);
+})
 
 
 
