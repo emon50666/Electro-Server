@@ -560,7 +560,7 @@ async function run() {
         tran_id: String(tran_id), // use unique tran_id for each api call
         success_url: 'http://localhost:9000/success-payment',
         fail_url: 'http://localhost:9000/fail',
-        cancel_url: 'http://localhost:5173/cancel',
+        cancel_url: 'http://localhost:9000/cancel',
         ipn_url: 'http://localhost:5173/ipn',
         shipping_method: 'Courier',
         product_name: product?.title,
@@ -660,7 +660,7 @@ app.post('/fail', async (req, res) => {
   res.redirect('http://localhost:5173/fail')
 })
 
-// fail payment 
+// cancel payment 
 app.post('/cancel', async (req, res) => {
   res.redirect('http://localhost:5173/cancel')
 })
