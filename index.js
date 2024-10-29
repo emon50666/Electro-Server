@@ -539,122 +539,139 @@ async function run() {
 
     // ========================================   Payment method api SSL E-commerce   ========================================
     // create na new id every api call 
-    const tran_id = Math.floor(10000 + Math.random() * 90000); // Random 5-digit number
-   
     app.post('/order', async (req, res) => {
+      const tran_id = Math.floor(10000 + Math.random() * 90000); // Generate a new unique tran_id for each order
       const formData = req.body;
-      const result = await checkoutCollection.insertOne(formData)
-
+      const result = await checkoutCollection.insertOne(formData);
+  
       console.log(formData);
-      // calculation product price 
-
-      const product = await productCollection.findOne({ _id: new ObjectId(req.body.getProductId) })
+      
+      // Calculate product price
+      const product = await productCollection.findOne({ _id: new ObjectId(req.body.getProductId) });
       console.log(product);
-
-
+  
       const data = {
-        store_id: 'digit66759e8fe463b',
-        store_passwd: 'digit66759e8fe463b@ssl',
-        total_amount: formData?.totalAmount,
-        currency: 'BDT',
-        tran_id: String(tran_id), // use unique tran_id for each api call
-        success_url: 'http://localhost:9000/success-payment',
-        fail_url: 'http://localhost:9000/fail',
-        cancel_url: 'http://localhost:9000/cancel',
-        ipn_url: 'http://localhost:5173/ipn',
-        shipping_method: 'Courier',
-        product_name: product?.title,
-        product_category: product?.category,
-        product_profile: 'general',
-        cus_name: formData?.name,
-        cus_email: formData?.user?.email,
-        cus_add1: formData?.address,
-        cus_add2: formData?.district,
-        cus_city: formData?.city,
-        cus_state: formData?.division,
-        cus_postcode: '1000',
-        cus_country: 'Bangladesh',
-        cus_phone: formData?.number,
-        cus_fax: '01711111111',
-        shipping_method: formData?.shipping,
-        payment_method:formData. paymentMethod,
-        ship_add1: 'Dhaka',
-        ship_add2: 'Dhaka',
-        ship_city: 'Dhaka',
-        ship_state: 'Dhaka',
-        ship_postcode: 1000,
-        ship_name: 'Courier',
-        ship_country: 'Bangladesh',
+          store_id: 'digit66759e8fe463b',
+          store_passwd: 'digit66759e8fe463b@ssl',
+          total_amount: formData?.totalAmount,
+          currency: 'BDT',
+          tran_id: String(tran_id), // Use the new tran_id for each API call
+          success_url: `http://localhost:9000/success-payment`,
+          fail_url: 'http://localhost:9000/fail',
+          cancel_url: 'http://localhost:9000/cancel',
+          ipn_url: 'http://localhost:5173/ipn',
+          shipping_method: 'Courier',
+          product_name: product?.title,
+          product_category: product?.category,
+          product_profile: 'general',
+          cus_name: formData?.name,
+          cus_email: formData?.user?.email,
+          cus_add1: formData?.address,
+          cus_add2: formData?.district,
+          cus_city: formData?.city,
+          cus_state: formData?.division,
+          cus_postcode: '1000',
+          cus_country: 'Bangladesh',
+          cus_phone: formData?.number,
+          cus_fax: '01711111111',
+          shipping_method: formData?.shipping,
+          payment_method: formData.paymentMethod,
+          ship_add1: 'Dhaka',
+          ship_add2: 'Dhaka',
+          ship_city: 'Dhaka',
+          ship_state: 'Dhaka',
+          ship_postcode: 1000,
+          ship_name: 'Courier',
+          ship_country: 'Bangladesh',
       };
       console.log(data);
-
-
-      //  post request sandbox
+  
+      // Post request to sandbox
       const response = await axios({
-        method: "POST",
-        url: 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php',
-        data: data,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      })
-
-      // save a payment data
+          method: "POST",
+          url: 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php',
+          data: data,
+          headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+          }
+      });
+  
+      // Save payment data with the new tran_id
       const saveData = {
-        cus_name: formData?.name,
-        cus_phone: formData?.number,
-        paymentId: String(tran_id),
-        product_name: product?.title,
-        cus_email: formData?.user?.email,
-        product_category: product?.category,
-        shipping_method: formData?.shipping,
-        cus_add1: formData?.address,
-        cus_add2: formData?.district,
-        cus_city: formData?.city,
-        cus_state: formData?.division,
-        payment_method:formData. paymentMethod,
-        amount: formData?.totalAmount,
-        status: 'pending'
-      }
-
-      const save = await paymentCollection.insertOne(saveData)
+          cus_name: formData?.name,
+          cus_phone: formData?.number,
+          paymentId: String(tran_id),
+          product_name: product?.title,
+          cus_email: formData?.user?.email,
+          product_category: product?.category,
+          shipping_method: formData?.shipping,
+          cus_add1: formData?.address,
+          cus_add2: formData?.district,
+          cus_city: formData?.city,
+          cus_state: formData?.division,
+          payment_method: formData.paymentMethod,
+          amount: formData?.totalAmount,
+          status: 'pending'
+      };
+  
+      const save = await paymentCollection.insertOne(saveData);
       if (save) {
-        res.send({
-          paymentUrl: response.data.GatewayPageURL,
-          result
-        })
+          res.send({
+              paymentUrl: response.data.GatewayPageURL,
+              result
+          });
       }
-
+  
       console.log(response);
-
-
-    })
+  });
+  
 
     // success payment 
 
+    // app.post('/success-payment', async (req, res) => {
+    //   const successData = req.body;
+    //   if(successData.status !== "VALID"){
+    //     throw new Error("unauthorize payment")
+    //   }
+
+    //   // update payment status
+    //   const query = {
+    //     paymentId: String(successData.tran_id), // Ensure matching tran_id type
+    //   };
+    //   const update={
+    //       $set:{
+    //         status: 'success'
+    //       }
+    //   }
+    //   const updateData = await paymentCollection.updateOne(query,update)
+    //   console.log('success data', successData);
+    //   console.log('updateData', updateData);
+
+    //   res.redirect('http://localhost:5173/success')
+
+    // })
     app.post('/success-payment', async (req, res) => {
       const successData = req.body;
-      if(successData.status !== "VALID"){
-        throw new Error("unauthorize payment")
+      if (successData.status !== "VALID") {
+          throw new Error("Unauthorized payment");
       }
-
-      // update payment status
+  
+      // Update payment status to 'success'
       const query = {
-        paymentId: String(successData.tran_id), // Ensure matching tran_id type
+          paymentId: String(successData.tran_id), // Match the transaction ID
       };
-      const update={
-          $set:{
-            status: 'success'
-          }
-      }
-      const updateData = await paymentCollection.updateOne(query,update)
-      console.log('success data', successData);
-      console.log('updateData', updateData);
-
-      res.redirect('http://localhost:5173/success')
-
-    })
-
+      const update = {
+          $set: {
+              status: 'success',
+          },
+      };
+      const updateData = await paymentCollection.updateOne(query, update);
+      console.log('Success data:', successData);
+      console.log('Update result:', updateData);
+  
+      // Redirect with the tran_id so frontend can display the specific payment
+      res.redirect(`http://localhost:5173/success/${successData.tran_id}`);
+  });
 // fail payment 
 app.post('/fail', async (req, res) => {
   res.redirect('http://localhost:5173/fail')
@@ -668,12 +685,16 @@ app.post('/cancel', async (req, res) => {
 
 
 
-app.get('/payments',async(req,res)=>{
- 
-  const result = await paymentCollection.find().toArray();
-  res.send(result);
-})
+app.get('/payments/:tranId', async (req, res) => {
+  const tranId = req.params.tranId; // Get tranId from the route params
+  const payment = await paymentCollection.findOne({ paymentId: tranId }); // Find the payment by transaction ID
 
+  if (!payment) {
+      return res.status(404).send({ message: "No payment found for this transaction." });
+  }
+
+  res.send(payment); // Send the payment details as a response
+});
 
 
 
