@@ -293,6 +293,14 @@ async function run() {
       const result = await cartCollection.deleteOne(query);
       res.send(result)
     })
+
+
+    // delete auto metic cart when complete order 
+   
+
+
+
+
     // ========================================   cart collection end    ========================================
 
 
@@ -697,8 +705,21 @@ app.get('/payments/:tranId', async (req, res) => {
 });
 
 
+app.get('/payments', async (req, res) => {
+  const result = await paymentCollection.find().toArray();
+  res.send(result)
+});
 
 
+
+
+// delete order api
+app.delete("/order/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) }
+  const result = await paymentCollection.deleteOne(query);
+  res.send(result)
+})
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
