@@ -12,13 +12,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.7",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+<<<<<<< HEAD
     "mongodb": "^6.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
+=======
+    "mongodb": "^6.8.1",
+    "sslcommerz": "^1.7.0",
+    "sslcommerz-lts": "^1.1.0"
+>>>>>>> 0c6c3cffce5f6f3f314ffca5cae037c9019cc535
   }
 }
