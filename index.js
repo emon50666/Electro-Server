@@ -1,5 +1,5 @@
 const express = require("express")
-const { MongoClient, ServerApiVersion, Collection, ObjectId, Timestamp } = require('mongodb');
+const { MongoClient, ServerApiVersion, Collection, ObjectId, Timestamp, OrderedBulkOperation } = require('mongodb');
 const cors = require("cors")
 
 const cookieParser = require("cookie-parser");
@@ -56,9 +56,45 @@ async function run() {
     const rightBottomRCollection = client.db('ElectroMart').collection('rightBottomRSliders')
     const locationCollection = client.db('ElectroMart').collection('location')
     const paymentCollection = client.db('ElectroMart').collection('payment')
+    const completeCollection = client.db('ElectroMart').collection('complete')
+    const chatCollection = client.db('ElectroMart').collection('chat')
 
 
 
+
+// Endpoint to get messages between a user and the admin
+app.get('/api/messages', async (req, res) => {
+  const { userId } = req.query;
+
+  try {
+    const messages = await db.collection('messages')
+                             .find({ userId })
+                             .sort({ timestamp: 1 })
+                             .toArray();
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Error retrieving messages' });
+  }
+});
+
+// Endpoint for sending a message
+app.post('/api/messages', async (req, res) => {
+  const { userId, userEmail, message, sender } = req.body;
+  const messageData = {
+    userId,
+    userEmail,
+    message,
+    sender,
+    timestamp: new Date()
+  };
+
+  try {
+    const result = await chatCollection.insertOne(messageData);
+    res.status(200).json(result.ops[0]); // return the inserted message
+  } catch (error) {
+    res.status(500).json({ error: 'Error sending message' });
+  }
+});
 
 
 
@@ -573,7 +609,7 @@ async function run() {
           product_category: product?.category,
           product_profile: 'general',
           cus_name: formData?.name,
-          cus_email: formData?.user?.email,
+          cus_email: formData?.adderMail,
           cus_add1: formData?.address,
           cus_add2: formData?.district,
           cus_city: formData?.city,
@@ -610,7 +646,7 @@ async function run() {
           cus_phone: formData?.number,
           paymentId: String(tran_id),
           product_name: product?.title,
-          cus_email: formData?.user?.email,
+          cus_email: formData?.adderMail,
           product_category: product?.category,
           shipping_method: formData?.shipping,
           cus_add1: formData?.address,
@@ -693,10 +729,12 @@ app.post('/cancel', async (req, res) => {
 
 
 
-app.get('/payments/:tranId', async (req, res) => {
-  const tranId = req.params.tranId; // Get tranId from the route params
-  const payment = await paymentCollection.findOne({ paymentId: tranId }); // Find the payment by transaction ID
 
+
+
+app.get('/payments/:id', async (req, res) => {
+  const id = req.params.id; // Get id from the route params
+  const payment = await paymentCollection.findOne({ paymentId:id }); // Find the payment by transaction ID
   if (!payment) {
       return res.status(404).send({ message: "No payment found for this transaction." });
   }
@@ -720,6 +758,42 @@ app.delete("/order/:id", async (req, res) => {
   const result = await paymentCollection.deleteOne(query);
   res.send(result)
 })
+
+
+
+
+// app.get("/orders/:id", async (req, res) => {
+//   const id = req.params.id;
+//   const query = { _id: new ObjectId(id) }
+//   const result = await checkoutCollection.findOne(query);
+//   res.send(result)
+// })
+
+// user order details per email
+app.get('/orders', async (req, res) => {
+  const result = await checkoutCollection.find().toArray();
+  res.send(result)
+});
+
+
+app.get('/orders/:email', async (req, res) => {
+  const email = req.params.email; // Get email from the route params
+
+  try {
+    // Find the payment by email
+    const payment = await paymentCollection.findOne({cus_name: email });
+
+    if (!payment) {
+      return res.status(404).send({ message: "No payment found for this email." });
+    }
+
+    res.send(payment); // Send the payment details as a response
+  } catch (error) {
+    res.status(500).send({ message: "Server error occurred." });
+  }
+});
+
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
