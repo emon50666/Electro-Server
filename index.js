@@ -338,8 +338,21 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
+
       res.send(result);
     });
+
+      res.send(result)
+    })
+
+
+    // delete auto metic cart when complete order 
+   
+
+
+
+
+
     // ========================================   cart collection end    ========================================
 
     // ========================================   compare collection start     ========================================
@@ -1008,6 +1021,7 @@ async function run() {
           _id: new ObjectId(id),
         });
 
+
         if (result.deletedCount === 1) {
           res.status(200).json({ message: "Order deleted successfully!" });
         } else {
@@ -1022,6 +1036,13 @@ async function run() {
     // Delete Order Endpoint
     app.delete("/orders/:id", async (req, res) => {
       const id = req.params.id; // Get the order ID from the route parameters
+
+app.get('/payments', async (req, res) => {
+  const result = await paymentCollection.find().toArray();
+  res.send(result)
+});
+
+
 
       try {
         // Attempt to delete the order from the collection using the provided _id
@@ -1067,6 +1088,14 @@ async function run() {
     
     
     
+
+// delete order api
+app.delete("/order/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) }
+  const result = await paymentCollection.deleteOne(query);
+  res.send(result)
+})
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
