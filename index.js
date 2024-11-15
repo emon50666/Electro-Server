@@ -844,7 +844,7 @@ async function run() {
           currency: "BDT",
           tran_id: tran_id,
 
-          // success_url: http://localhost:9000/success-payment,
+         success_url:(` http://localhost:9000/success-payment`),
           fail_url: "http://localhost:9000/fail",
           cancel_url: "http://localhost:9000/cancel",
           ipn_url: "http://localhost:5173/ipn",
@@ -939,7 +939,7 @@ async function run() {
         await paymentHoldingCollection.deleteOne({
           tran_id: sTranId,
         });
-        // res.redirect(http://localhost:5173/success/${sTranId});
+        res.redirect(`http://localhost:5173/success/${sTranId}`);
       }
     });
 
