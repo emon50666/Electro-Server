@@ -11,12 +11,12 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { default: axios } = require("axios");
 require("dotenv").config();
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 3000;
 const app = express();
 
 // middle ware
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173","http://localhost:5174"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -844,9 +844,9 @@ async function run() {
           currency: "BDT",
           tran_id: tran_id,
 
-         success_url:(` http://localhost:9000/success-payment`),
-          fail_url: "http://localhost:9000/fail",
-          cancel_url: "http://localhost:9000/cancel",
+         success_url:(` http://localhost:3000/success-payment`),
+          fail_url: "http://localhost:3000/fail",
+          cancel_url: "http://localhost:3000/cancel",
           ipn_url: "http://localhost:5173/ipn",
           product_name: "Demo",
           product_category: "Demo",
