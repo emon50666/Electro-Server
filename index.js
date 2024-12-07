@@ -16,7 +16,7 @@ const app = express();
 
 // middle ware
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173", "http://localhost:5174"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -24,7 +24,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded());
-
 app.use(cookieParser());
 
 // const store_id = 'elect671ce752b3f2b';
@@ -34,7 +33,6 @@ app.use(cookieParser());
 const uri = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_SECRET_API_KEY}@cluster0.mbvqn67.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const client = new MongoClient(uri, {
   // Your MongoDB client options here
-
 
   serverApi: {
     version: ServerApiVersion.v1,
@@ -804,11 +802,14 @@ async function run() {
     // Get All Orders Endpoint
     // Endpoint to handle order creation
     app.post("/order", async (req, res) => {
-      const tran_id = Math.floor(10000 + Math.random() * 90000); // Generate as a string
-
+      const tran_id = Math.floor(10000 + Math.random() * 90000);
       const formData = req.body;
       console.log(formData);
-
+      const query = {
+        _id: {
+          $in: formData.cartIds.map((id) => new ObjectId(id)),
+        },
+      };
       if (formData.paymentMethod === "cashOnDelivery") {
         // Cash on Delivery: Directly save to ordersCollection
         const saveData = {
@@ -817,9 +818,11 @@ async function run() {
           paymentStatus: "Pending",
           orderStatus: "Processing", // Set initial status for cash orders
         };
-
+        // deleting carts item
+        const deleteResult = await cartCollection.deleteMany(query);
         const result = await ordersCollection.insertOne(saveData); // Save order immediately
         return res.send({
+          deleteResult,
           message: "Order placed successfully with Cash on Delivery.",
           result,
         });
@@ -844,7 +847,7 @@ async function run() {
           currency: "BDT",
           tran_id: tran_id,
 
-         success_url:(` http://localhost:9000/success-payment`),
+          success_url: ` http://localhost:9000/success-payment`,
           fail_url: "http://localhost:9000/fail",
           cancel_url: "http://localhost:9000/cancel",
           ipn_url: "http://localhost:5173/ipn",
@@ -878,6 +881,8 @@ async function run() {
           ship_name: "Courier",
         };
 
+        // deleting data from cart
+        const deleteResult = await cartCollection.deleteMany(query);
         // Make a request to SSLCommerz for payment initiation
         const response = await axios({
           method: "POST",
@@ -891,6 +896,7 @@ async function run() {
         console.log("payment url:", response.data);
         // Return the payment URL to frontend for redirection
         return res.send({
+          deleteResult,
           paymentUrl: response.data.GatewayPageURL,
           tran_id,
         });
@@ -1042,34 +1048,35 @@ async function run() {
         res.status(500).json({ message: "Failed to delete order" });
       }
     });
-    app.get('/orders', async (req, res) => {
+    app.get("/orders", async (req, res) => {
       const { email } = req.query;
-      
+
       // Ensure email is provided in the query
       if (!email) {
-        return res.status(400).json({ message: 'Email query parameter is required' });
+        return res
+          .status(400)
+          .json({ message: "Email query parameter is required" });
       }
-    
+
       try {
         // Find orders by matching the email in 'userEmail' field
-        const orders = await ordersCollection.find({ userEmail: email }).toArray();
-        
-        
+        const orders = await ordersCollection
+          .find({ userEmail: email })
+          .toArray();
 
         // Check if orders are found
         if (orders.length === 0) {
-          return res.status(404).json({ message: 'No orders found for this email' });
+          return res
+            .status(404)
+            .json({ message: "No orders found for this email" });
         }
-        
+
         res.json(orders);
       } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: "Server error" });
       }
     });
-    
-    
-    
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
