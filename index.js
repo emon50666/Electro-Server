@@ -16,7 +16,7 @@ const app = express();
 
 // middle ware
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: ["http://localhost:5173", "http://localhost:5174","https://inspiring-torrone-8b8b9e.netlify.app"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -567,6 +567,23 @@ async function run() {
     // ========================================   Checkout page api    ========================================
 
   
+    // update shipping charge 
+    app.put("/orders", async (req, res) => {
+      const shipping = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          shipping: shippingLabel,
+        },
+      };
+      const result = await storeCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
 
     //     })
 
@@ -627,10 +644,12 @@ async function run() {
           currency: "BDT",
           tran_id: tran_id,
 
-          success_url: ` http://localhost:3000/success-payment`,
-          fail_url: "http://localhost:3000/fail",
-          cancel_url: "http://localhost:3000/cancel",
-          ipn_url: "http://localhost:5173/ipn",
+          success_url: ` https://electro-mart-server-sable.vercel.app/success-payment`,
+          fail_url: "https://electro-mart-server-sable.vercel.app/fail",
+          cancel_url: "https://electro-mart-server-sable.vercel.app/cancel",
+          // ipn_url: "http://localhost:5173/ipn",
+          ipn_url: "https://monumental-clafoutis-5880be.netlify.app/ipn",
+
           product_name: "Demo",
           product_category: "Demo",
           product_profile: "general",
@@ -725,7 +744,9 @@ async function run() {
         await paymentHoldingCollection.deleteOne({
           tran_id: sTranId,
         });
-        res.redirect(`http://localhost:5173/success/${sTranId}`);
+        // res.redirect(`http://localhost:5173/success/${sTranId}`);
+        res.redirect(`https://inspiring-torrone-8b8b9e.netlify.app/success/${sTranId}`);
+
       }
     });
 
@@ -762,12 +783,16 @@ async function run() {
 
     // Fail payment handling
     app.post("/fail", async (req, res) => {
-      res.redirect("http://localhost:5173/fail");
+      // res.redirect("http://localhost:5173/fail");
+      res.redirect("https://inspiring-torrone-8b8b9e.netlify.app/fail");
+
     });
 
     // Cancel payment handling
     app.post("/cancel", async (req, res) => {
-      res.redirect("http://localhost:5173/cancel");
+      // res.redirect("http://localhost:5173/cancel");
+      res.redirect("https://inspiring-torrone-8b8b9e.netlify.app/cancel");
+
     });
 
     app.get("/orders", async (req, res) => {
