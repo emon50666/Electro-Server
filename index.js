@@ -644,9 +644,10 @@ async function run() {
           currency: "BDT",
           tran_id: tran_id,
 
-          success_url: ` https://electros-mart.netlify.app/success-payment`,
-          fail_url: "https://electros-mart.netlify.app/fail",
-          cancel_url: "https://electros-mart.netlify.app/cancel",
+          // success_url: `http://localhost:3000/success-payment`,
+          success_url: `https://electro-mart-server-sable.vercel.app/success-payment`,
+          fail_url: "https://electro-mart-server-sable.vercel.app/fail",
+          cancel_url: "https://electro-mart-server-sable.vercel.app/cancel",
           // ipn_url: "http://localhost:5173/ipn",
           ipn_url: "https://electros-mart.netlify.app/ipn",
 
