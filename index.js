@@ -1,11 +1,5 @@
 const express = require("express");
-const {
-  MongoClient,
-  ServerApiVersion,
-  Collection,
-  ObjectId,
-  Timestamp,
-} = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 
 const cookieParser = require("cookie-parser");
@@ -23,7 +17,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.urlencoded());
+// app.use(express.urlencoded());
 app.use(cookieParser());
 
 // const store_id = 'elect671ce752b3f2b';
@@ -84,6 +78,27 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await productCollection.findOne(query);
       res.send(result);
+    });
+
+    // Assuming you have Express and MongoDB set up
+    app.get("/product/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+
+        // If you're using ObjectId in MongoDB
+        const objectId = new ObjectId(id);
+
+        const product = await productCollection.findOne({ _id: objectId });
+
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.json(product);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
     });
 
     app.post("/products", async (req, res) => {
@@ -193,8 +208,109 @@ async function run() {
         res.status(500).json({ message: "Error fetching product details" });
       }
     });
-
     // ========================================   product collection end    ========================================
+
+    // ========================================   offer product collection start    ========================================
+    app.get("/offerProducts", async (req, res) => {
+      try {
+        const { discountPercentage, limit, isHot, isNew } = req.query;
+        // console.log("query params:", req.query);
+
+        const query = {};
+
+        if (isHot == "false") {
+          query.isHot = "no";
+        }
+
+        if (isNew == "false") {
+          query.isNew = "no";
+        }
+
+        if (discountPercentage) {
+          query.discountPercentage = { $gt: 0 };
+        }
+
+        const result = await productCollection
+          .find(query)
+          .limit(parseInt(limit))
+          .toArray();
+
+        // console.log(result);
+        res.send(result);
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // ========================================   offer product collection end    ========================================
+
+    // ========================================   feature product collection start    ========================================
+    app.get("/featureProducts", async (req, res) => {
+      try {
+        const { discountPercentage, limit, isHot, isNew } = req.query;
+        // console.log("query params:", req.query);
+
+        const query = {};
+
+        if (isHot) {
+          query.isHot = "yes";
+        }
+
+        if (isNew == "false") {
+          query.isNew = "no";
+        }
+
+        if (discountPercentage) {
+          query.discountPercentage = { $gt: 0 };
+        }
+
+        const result = await productCollection
+          .find(query)
+          .limit(parseInt(limit))
+          .toArray();
+
+        // console.log(result);
+        res.send(result);
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // ========================================   feature product collection end    ========================================
+
+    // ========================================   new product collection start    ========================================
+    app.get("/newProducts", async (req, res) => {
+      try {
+        const { discountPercentage, limit, isHot, isNew } = req.query;
+        // console.log("query params:", req.query);
+
+        const query = {};
+
+        if (isHot == "false") {
+          query.isHot = "no";
+        }
+
+        if (isNew == "false") {
+          query.isNew = "yes";
+        }
+
+        if (discountPercentage) {
+          query.discountPercentage = 0;
+        }
+
+        const result = await productCollection
+          .find(query)
+          .limit(parseInt(limit))
+          .toArray();
+
+        // console.log(result);
+        res.send(result);
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // ========================================   new product collection end    ========================================
 
     // =================================== user collection start ===================================
     app.put("/user", async (req, res) => {
@@ -579,226 +695,6 @@ async function run() {
       res.send(result);
     });
 
-    // ========================================   Payment method api SSL E-commerce   ========================================
-    //     // create na new id every api call
-    //     app.post('/order', async (req, res) => {
-    //       const tran_id = Math.floor(10000 + Math.random() * 90000); // Generate a new unique tran_id for each order
-    //       const formData = req.body;
-    //       const result = await ordersCollection.insertOne(formData);
-
-    //       // console.log(formData);
-
-    //       // Calculate product price
-    //       const product = await productCollection.findOne({ _id: new ObjectId(req.body.getProductId) });
-    //       // console.log(product);
-
-    //       const data = {
-    //           store_id: 'digit66759e8fe463b',
-    //           store_passwd: 'digit66759e8fe463b@ssl',
-    //           total_amount: formData?.totalAmount,
-    //           currency: 'BDT',
-    //           tran_id: String(tran_id), // Use the new tran_id for each API call
-    //           success_url: http://localhost:9000/success-payment,
-    //           fail_url: 'http://localhost:9000/fail',
-    //           cancel_url: 'http://localhost:9000/cancel',
-    //           ipn_url: 'http://localhost:5173/ipn',
-    //           shipping_method: 'Courier',
-    //           product_name: product?.title,
-    //           product_category: product?.category,
-    //           product_profile: 'general',
-    //           cus_name: formData?.name,
-    //           cus_email: formData?.user?.email,
-    //           cus_add1: formData?.address,
-    //           cus_add2: formData?.district,
-    //           cus_city: formData?.city,
-    //           cus_state: formData?.division,
-    //           cus_postcode: '1000',
-    //           cus_country: 'Bangladesh',
-    //           cus_phone: formData?.number,
-    //           cus_fax: '01711111111',
-    //           shipping_method: formData?.shipping,
-    //           payment_method: formData.paymentMethod,
-    //           ship_add1: 'Dhaka',
-    //           ship_add2: 'Dhaka',
-    //           ship_city: 'Dhaka',
-    //           ship_state: 'Dhaka',
-    //           ship_postcode: 1000,
-    //           ship_name: 'Courier',
-    //           ship_country: 'Bangladesh',
-    //       };
-    //       console.log(data);
-
-    //       // Post request to sandbox
-    //       const response = await axios({
-    //           method: "POST",
-    //           url: 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php',
-    //           data: data,
-    //           headers: {
-    //               "Content-Type": "application/x-www-form-urlencoded"
-    //           }
-    //       });
-
-    //       // Save payment data with the new tran_id
-    //       const saveData = {
-    //           cus_name: formData?.name,
-    //           cus_phone: formData?.number,
-    //           paymentId: String(tran_id),
-    //           product_name: product?.title,
-    //           cus_email: formData?.user?.email,
-    //           product_category: product?.category,
-    //           shipping_method: formData?.shipping,
-    //           cus_add1: formData?.address,
-    //           cus_add2: formData?.district,
-    //           cus_city: formData?.city,
-    //           cus_state: formData?.division,
-    //           payment_method: formData.paymentMethod,
-    //           amount: formData?.totalAmount,
-    //           status: 'pending'
-    //       };
-
-    //       const save = await ordersCollection.insertOne(saveData);
-    //       if (save) {
-    //           res.send({
-    //               paymentUrl: response.data.GatewayPageURL,
-    //               result
-    //           });
-    //       }
-
-    //       console.log(response);
-    //   });
-
-    //     // success payment
-
-    //     app.post('/success-payment', async (req, res) => {
-    //       const successData = req.body;
-    //       if(successData.status !== "VALID"){
-    //         throw new Error("unauthorize payment")
-    //       }
-
-    //       // update payment status
-    //       const query = {
-    //         paymentId: String(successData.tran_id), // Ensure matching tran_id type
-    //       };
-    //       const update={
-    //           $set:{
-    //             status: 'success'
-    //           }
-    //       }
-    //       const updateData = await paymentCollection.updateOne(query,update)
-    //       console.log('success data', successData);
-    //       console.log('updateData', updateData);
-
-    //       res.redirect('http://localhost:5173/success')
-
-    //     })
-    //     app.post('/success-payment', async (req, res) => {
-    //       const successData = req.body;
-    //       if (successData.status !== "VALID") {
-    //           throw new Error("Unauthorized payment");
-    //       }
-
-    //       // Update payment status to 'success'
-    //       const query = {
-    //           paymentId: String(successData.tran_id), // Match the transaction ID
-    //       };
-    //       const update = {
-    //           $set: {
-    //               status: 'success',
-    //           },
-    //       };
-    //       const updateData = await ordersCollection.updateOne(query, update);
-    //       console.log('Success data:', successData);
-    //       console.log('Update result:', updateData);
-
-    //       // Redirect with the tran_id so frontend can display the specific payment
-    //       res.redirect(http://localhost:5173/success/${successData.tran_id});
-    //   });
-    // // fail payment
-    // app.post('/fail', async (req, res) => {
-    //   res.redirect('http://localhost:5173/fail')
-    // })
-
-    // // cancel payment
-    // app.post('/cancel', async (req, res) => {
-    //   res.redirect('http://localhost:5173/cancel')
-    // })
-
-    // app.get('/payments/:tranId', async (req, res) => {
-    //   const tranId = req.params.tranId; // Get tranId from the route params
-    //   const payment = await ordersCollection.findOne({ paymentId: tranId }); // Find the payment by transaction ID
-
-    //   if (!payment) {
-    //       return res.status(404).send({ message: "No payment found for this transaction." });
-    //   }
-
-    //   res.send(payment); // Send the payment details as a response
-    // });
-
-    // app.post("/order", async (req, res) => {
-    //   const { paymentMethod, ...orderData } = req.body;
-
-    //   console.log("Order Data:", orderData); // Log order data
-
-    //   try {
-    //     // Create a new order in the database
-    //     const result = await ordersCollection.insertOne(orderData);
-
-    //     if (paymentMethod === "Bkash") {
-    //       // Call SSLCommerz to create a payment request
-    //       const paymentUrl = await createBkashPayment(
-    //         result.insertedId,
-    //         orderData.totalAmount
-    //       );
-    //       return res.json({ paymentUrl });
-    //     }
-
-    //     // For Cash on Delivery, respond with success
-    //     return res.status(200).json({ message: "Order placed successfully!" });
-    //   } catch (error) {
-    //     console.error("Order placement error:", error);
-    //     return res
-    //       .status(500)
-    //       .json({ message: "Order placement failed", error });
-    //   }
-    // });
-
-    // // Function to create a Bkash payment request via SSLCommerz
-    // const createBkashPayment = async (orderId, totalAmount) => {
-    //   const paymentData = {
-    //     // Replace these with your actual SSLCommerz credentials and order details
-    //     store_id: process.env.SSL_STORE_ID,
-    //     store_passwd: process.env.SSL_STORE_PASSWORD,
-    //     total_amount: totalAmount,
-    //     currency: "BDT",
-    //     transaction_id: txn_${orderId}, // Unique transaction ID
-    //     success_url: ${process.env.APP_URL}/payment/success, // URL for success response
-    //     fail_url: ${process.env.APP_URL}/payment/fail, // URL for failure response
-    //     cancel_url: ${process.env.APP_URL}/payment/cancel, // URL for cancellation
-    //     product_category: "E-commerce",
-    //     product_name: "Order",
-    //     product_profile: "general",
-    //     shipping_method: "Courier",
-
-    //   };
-
-    //   console.log("Payment Data:", paymentData); // Log the payment data
-
-    //   try {
-    //     const response = await axios.post(
-    //       "https://sandbox.sslcommerz.com/gwprocess/v4/gw.php",
-    //       paymentData
-    //     );
-    //     console.log("SSLCommerz Response:", response.data); // Log the response from SSLCommerz
-    //     return response.data.GatewayPageURL; // Return the payment URL for redirection
-    //   } catch (error) {
-    //     console.error(
-    //       "Payment request error:",
-    //       error.response ? error.response.data : error.message
-    //     );
-    //     throw new Error("Failed to create payment request");
-    //   }
-    // };
-
     // Get All Orders Endpoint
     // Endpoint to handle order creation
     app.post("/order", async (req, res) => {
@@ -815,8 +711,8 @@ async function run() {
         const saveData = {
           ...formData,
           tran_id: tran_id,
-          paymentStatus: "Pending",
-          orderStatus: "Processing", // Set initial status for cash orders
+          paymentStatus: "pending",
+          orderStatus: "processing",
         };
         // deleting carts item
         const deleteResult = await cartCollection.deleteMany(query);
