@@ -5,12 +5,12 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const { default: axios } = require("axios");
 require("dotenv").config();
-const port = process.env.PORT || 9000;
+const port = process.env.PORT || 3000;
 const app = express();
 
 // middle ware
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: ["http://localhost:5173", "http://localhost:5174","https://electros-mart.netlify.app"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -682,10 +682,24 @@ async function run() {
 
     // ========================================   Checkout page api    ========================================
 
-    //  app.post('/order',async(req,res)=>{
-    //   const formData = req.body;
-    //   const result = await checkoutCollection.insertOne(formData)
-    //   res.send(result)
+  
+    // update shipping charge 
+    app.put("/orders", async (req, res) => {
+      const shipping = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: false };
+      const updateDoc = {
+        $set: {
+          shipping: shippingLabel,
+        },
+      };
+      const result = await storeCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
 
     //     })
 
@@ -694,6 +708,8 @@ async function run() {
       const result = await locationCollection.find().toArray();
       res.send(result);
     });
+
+    // ========================================   Payment method api SSL E-commerce   ========================================
 
     // Get All Orders Endpoint
     // Endpoint to handle order creation
@@ -743,10 +759,13 @@ async function run() {
           currency: "BDT",
           tran_id: tran_id,
 
-          success_url: ` http://localhost:9000/success-payment`,
-          fail_url: "http://localhost:9000/fail",
-          cancel_url: "http://localhost:9000/cancel",
-          ipn_url: "http://localhost:5173/ipn",
+          // success_url: `http://localhost:3000/success-payment`,
+          success_url: `https://electro-mart-server-sable.vercel.app/success-payment`,
+          fail_url: "https://electro-mart-server-sable.vercel.app/fail",
+          cancel_url: "https://electro-mart-server-sable.vercel.app/cancel",
+          // ipn_url: "http://localhost:5173/ipn",
+          ipn_url: "https://electros-mart.netlify.app/ipn",
+
           product_name: "Demo",
           product_category: "Demo",
           product_profile: "general",
@@ -841,7 +860,9 @@ async function run() {
         await paymentHoldingCollection.deleteOne({
           tran_id: sTranId,
         });
-        res.redirect(`http://localhost:5173/success/${sTranId}`);
+        // res.redirect(`http://localhost:5173/success/${sTranId}`);
+        res.redirect(`https://electros-mart.netlify.app/success/${sTranId}`);
+
       }
     });
 
@@ -878,12 +899,16 @@ async function run() {
 
     // Fail payment handling
     app.post("/fail", async (req, res) => {
-      res.redirect("http://localhost:5173/fail");
+      // res.redirect("http://localhost:5173/fail");
+      res.redirect("https://electros-mart.netlify.app/fail");
+
     });
 
     // Cancel payment handling
     app.post("/cancel", async (req, res) => {
-      res.redirect("http://localhost:5173/cancel");
+      // res.redirect("http://localhost:5173/cancel");
+      res.redirect("https://electros-mart.netlify.app/cancel");
+
     });
 
     app.get("/orders", async (req, res) => {
