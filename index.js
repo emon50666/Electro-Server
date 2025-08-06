@@ -1,11 +1,5 @@
 const express = require("express");
-const {
-  MongoClient,
-  ServerApiVersion,
-  Collection,
-  ObjectId,
-  Timestamp,
-} = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 
 const cookieParser = require("cookie-parser");
@@ -23,7 +17,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.urlencoded());
+// app.use(express.urlencoded());
 app.use(cookieParser());
 
 // const store_id = 'elect671ce752b3f2b';
@@ -84,6 +78,27 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await productCollection.findOne(query);
       res.send(result);
+    });
+
+    // Assuming you have Express and MongoDB set up
+    app.get("/product/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+
+        // If you're using ObjectId in MongoDB
+        const objectId = new ObjectId(id);
+
+        const product = await productCollection.findOne({ _id: objectId });
+
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        res.json(product);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
     });
 
     app.post("/products", async (req, res) => {
@@ -193,8 +208,109 @@ async function run() {
         res.status(500).json({ message: "Error fetching product details" });
       }
     });
-
     // ========================================   product collection end    ========================================
+
+    // ========================================   offer product collection start    ========================================
+    app.get("/offerProducts", async (req, res) => {
+      try {
+        const { discountPercentage, limit, isHot, isNew } = req.query;
+        // console.log("query params:", req.query);
+
+        const query = {};
+
+        if (isHot == "false") {
+          query.isHot = "no";
+        }
+
+        if (isNew == "false") {
+          query.isNew = "no";
+        }
+
+        if (discountPercentage) {
+          query.discountPercentage = { $gt: 0 };
+        }
+
+        const result = await productCollection
+          .find(query)
+          .limit(parseInt(limit))
+          .toArray();
+
+        // console.log(result);
+        res.send(result);
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // ========================================   offer product collection end    ========================================
+
+    // ========================================   feature product collection start    ========================================
+    app.get("/featureProducts", async (req, res) => {
+      try {
+        const { discountPercentage, limit, isHot, isNew } = req.query;
+        // console.log("query params:", req.query);
+
+        const query = {};
+
+        if (isHot) {
+          query.isHot = "yes";
+        }
+
+        if (isNew == "false") {
+          query.isNew = "no";
+        }
+
+        if (discountPercentage) {
+          query.discountPercentage = { $gt: 0 };
+        }
+
+        const result = await productCollection
+          .find(query)
+          .limit(parseInt(limit))
+          .toArray();
+
+        // console.log(result);
+        res.send(result);
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // ========================================   feature product collection end    ========================================
+
+    // ========================================   new product collection start    ========================================
+    app.get("/newProducts", async (req, res) => {
+      try {
+        const { discountPercentage, limit, isHot, isNew } = req.query;
+        // console.log("query params:", req.query);
+
+        const query = {};
+
+        if (isHot == "false") {
+          query.isHot = "no";
+        }
+
+        if (isNew == "false") {
+          query.isNew = "yes";
+        }
+
+        if (discountPercentage) {
+          query.discountPercentage = 0;
+        }
+
+        const result = await productCollection
+          .find(query)
+          .limit(parseInt(limit))
+          .toArray();
+
+        // console.log(result);
+        res.send(result);
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+        res.status(500).json({ message: "Server error" });
+      }
+    });
+    // ========================================   new product collection end    ========================================
 
     // =================================== user collection start ===================================
     app.put("/user", async (req, res) => {
@@ -594,7 +710,6 @@ async function run() {
     });
 
     // ========================================   Payment method api SSL E-commerce   ========================================
-    
 
     // Get All Orders Endpoint
     // Endpoint to handle order creation
@@ -612,8 +727,8 @@ async function run() {
         const saveData = {
           ...formData,
           tran_id: tran_id,
-          paymentStatus: "Pending",
-          orderStatus: "Processing", // Set initial status for cash orders
+          paymentStatus: "pending",
+          orderStatus: "processing",
         };
         // deleting carts item
         const deleteResult = await cartCollection.deleteMany(query);
